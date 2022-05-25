@@ -264,7 +264,7 @@ if __name__=="__main__":
                         help='Usage: -test test_file.txt',
                         type=str,
                         )
-
+    #this file expects all the hepatitis files from Datasets
     #grab cmd line arguments from parser
     args = parser.parse_args()
     if args.xvalidate == 1:
