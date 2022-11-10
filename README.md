@@ -1,7 +1,10 @@
 # ai_algorithms
-Implementations of common AI algorithms from scratch I did for a graduate class in AI.
+Implementations of common AI algorithms from scratch.
+I wrote these programs for various classes I am taking in compsci graduate school.
 
-Note that to run the algorithms you need to move the corresponding files from the Datasets folder to your current directory
+Jupyter notebooks should be self contained.
+
+For .py scripts, to run the algorithms you need to move the corresponding files from the Datasets folder to your current directory
 
 It is very clearn in the main loop in each program which file it expects.
 
