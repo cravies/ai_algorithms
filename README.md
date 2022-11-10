@@ -1,5 +1,6 @@
 # ai_algorithms
 Implementations of common AI algorithms from scratch.
+I mostly used numpy. For the complicated neural network models I used pytorch.
 I wrote these programs for various classes I am taking in compsci graduate school.
 
 Jupyter notebooks should be self contained.
