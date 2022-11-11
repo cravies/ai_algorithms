@@ -4,25 +4,27 @@ global optima of the rosenbrock function.
 """
 import numpy as np
 from matplotlib import pyplot as plt
-from numpy.random import rand
+from numpy.random import randn, rand
 from random import randint
 import operator
 from copy import copy
+from PIL import Image
+import os
 
-def rosenbrock(x,y):
+def rosenbrock(x: float,y: float) -> float:
     """
     compute rosenbrock function
     """
     return (a-x)**2 + b*(y-x**2)**2
 
-def init_population(n):
+def init_population(n: int) -> np.array:
     """
     initialize n candidates
     """
     pop = rand(n,2)
     return pop
 
-def inverse(val):
+def inverse(val: float) -> float:
     """
     protected inverse
     """
@@ -31,27 +33,30 @@ def inverse(val):
     else:
         return 1/val
 
-def mutate(pop_x,pop_y):
+def mutate(pop_x: list[float],pop_y: list[float]) -> list[list[float]]:
     """
     randomly mutate n of the candidates.
     iterate mut_rate times:
         pick random person p_r
-        add small random noise to co-ordinates
+        add small random noise 
+        n ~ N(0,0.1 * I)
+        to co-ordinates
         modulus (x_max, y_max) to stay 
         in the function range
+    return [pop_x,pop_y]
     """
     rng = len(pop_x)
     for i in range(0,mut_rate):
         r = randint(0,rng-1)
         r_x,r_y = pop_x[r],pop_y[r]
-        r_x = (r_x + 0.1*rand()) % x_max
-        r_y = (r_y + 0.1*rand()) % y_max
+        r_x = (r_x + 0.1*randn()) % x_max
+        r_y = (r_y + 0.1*randn()) % y_max
         print("permuted to: ",r_x,r_y)
         pop_x[r] = r_x
         pop_y[r] = r_y
     return pop_x,pop_y
 
-def crossover(pop_x,pop_y):
+def crossover(pop_x: list[float],pop_y: list[float]) -> list[list[float]]:
     """
     iterate cross_rate times:
         choose two random parents
@@ -62,6 +67,7 @@ def crossover(pop_x,pop_y):
         c1 = [x1,y2]
         c2 = [x2,y1]
         add c1,c2 to population.
+    return [pop_x, pop_y]
     """
     sz = len(pop_x)
     for i in range(0,cross_rate):
@@ -85,7 +91,7 @@ def crossover(pop_x,pop_y):
     return pop_x, pop_y 
 
 
-def selection(pop_x,pop_y):
+def selection(pop_x: list[float],pop_y: list[float]) -> list[list[float]]:
     """
     Truncation selection.
     Given a population specified by:
@@ -95,6 +101,7 @@ def selection(pop_x,pop_y):
     remove the n individuals with lowest fitness.
     The fitness is defined as 1/f(x) 
     as we are trying to find minima of f(x)
+    returns [list(pop_x), list(pop_y)]
     """
     score = {}
     for i in range(0,len(pop_x)):
@@ -103,14 +110,12 @@ def selection(pop_x,pop_y):
         #minimizing so fitness value inverse
         fitness = inverse(rosenbrock(x,y))
         score[f"{i}"] = fitness 
-        print(f"point {i} at {x},{y} has fitness {fitness}")
 
     #get rid of weakest individuals
     sorted_score = dict(sorted(
             score.items(),
             key=operator.itemgetter(1),
             ))
-    print(sorted_score)
 
     #indexes to be eliminated
     perished_inds = list(sorted_score.keys())[0:select_rate]
@@ -123,7 +128,14 @@ def selection(pop_x,pop_y):
 
     return list(pop_x), list(pop_y)
 
-def iterate(pop_x,pop_y):
+def iterate(pop_x: list[float],pop_y: list[float]) -> list[list[float]]:
+    """
+    perform mutation, crossover, 
+    and selection on a population.
+    input:
+    pop_x, pop_y
+    returns [pop_x, pop_y]
+    """
     #mutate a couple of points
     pop_x, pop_y = mutate(pop_x,pop_y)
     #crossover
@@ -132,7 +144,7 @@ def iterate(pop_x,pop_y):
     pop_x, pop_y = selection(pop_x, pop_y)
     return pop_x, pop_y
 
-def plot_background(x_min,x_max,y_min,y_max):
+def plot_background(x_min: int,x_max: int,y_min: int,y_max: int) -> None:
     """
     contour plot of background function 
     (rosenbrock) r(x,y) given x,y range
@@ -141,10 +153,10 @@ def plot_background(x_min,x_max,y_min,y_max):
     y = np.linspace(y_min,y_max,1000)
     xx, yy = np.meshgrid(x,y)
     zz = rosenbrock(xx,yy)
-    plt.contour(x,y,zz,50)
+    plt.contourf(x,y,zz,30,cmap='plasma_r')
     plt.title("Rosenbrock function.")
 
-def converged(x_old,x_new,y_old,y_new,tol):
+def converged(x_old: list[float],x_new: list[float],y_old: list[float],y_new: list[float],tol: float) -> bool:
     """
     given a previous set of x and y coords
     that define a population, and a current set,
@@ -160,25 +172,46 @@ def converged(x_old,x_new,y_old,y_new,tol):
         return True
     return False
 
-def main(pop_size, x_min, x_max, y_min, y_max, tol, iters):
-    plot_background(x_min,x_max,y_min,y_max)
+def getint(name: str) -> int:
+    """
+    given a filename input in 
+    the format num.png, return the 
+    number num
+    """
+    num, _ = name.split('.')
+    return int(num)
+
+def make_gif(fp_out: str) -> None:
+    """
+    Given a input and output path in the format:
+    fp_in = "/path/to/image_*.png"
+    fp_out = "/path/to/image.gif"
+    Convert the *ordered* images in the input 
+    to the gif in the output.
+    """
+    files = os.listdir('./')
+    files = sorted([f for f in files if '.png' in f], key=getint)
+    print(files)
+    imgs = (Image.open(f) for f in files)
+    img = next(imgs)  # extract first image from iterator
+    img.save(fp=fp_out, format='GIF', append_images=imgs,
+            save_all=True, duration=300, loop=0)
+
+def main(pop_size: int, x_min: float, x_max: float, y_min: float, y_max: float, tol: float, iters: int) -> None:
     #grab population of points and plot
     pop = init_population(pop_size)
-    print("pop is", pop)
     pop_x = pop[:,0]
     pop_y = pop[:,1]
     #scale to range of plot
     pop_x = [x_diff * i + x_min for i in pop_x]
     pop_y = [y_diff * i + y_min for i in pop_y]
-    print("x min", min(pop_x), "x_max", max(pop_x))
-    print("y min", min(pop_y), "y_max", max(pop_y))
-    plt.scatter(pop_x,pop_y,color="red")
-    plt.show()
 
     #relative convergence tolerance
     tol=2e-1
     #iterate over generations
     for i in range(iters):
+        print("~"*30)
+        print(f"ITER {i}")
         #convergence check
         pop_x_old = copy(pop_x)
         pop_y_old = copy(pop_y)
@@ -187,19 +220,37 @@ def main(pop_size, x_min, x_max, y_min, y_max, tol, iters):
             print(f"converged at iter {i}")
             break
         print(len(pop_x),len(pop_y))
+        #plot results
+        plot_background(x_min,x_max,y_min,y_max)
+        plt.scatter(pop_x,pop_y,color="red",marker="x",label="population")
+        #plot mean
+        mean_x = np.mean(pop_x)
+        mean_y = np.mean(pop_y)
+        mean_fitness = inverse(rosenbrock(mean_x,mean_y))
+        plt.scatter(1,1,color='green',marker='o',label="global minima")
+        plt.scatter(np.mean(pop_x),np.mean(pop_y),color='blue',marker='o',label="polulation mean")
+        plt.title(f"Mean sol fitness {mean_fitness:1f} \n Mean coords [{mean_x:2f},{mean_y:2f}]")
+        plt.legend()
+        plt.savefig(f'./{i}.png')
+        plt.clf()
 
-    #plot results
-    plot_background(x_min,x_max,y_min,y_max)
-    plt.scatter(pop_x,pop_y,color="red",marker="x")
-    plt.show()
+    #make gif of results
+    #filepath for output
+    fp_out = "./res.gif"
+    make_gif(fp_out)
+    #remove pngs used to make gif
+    os.system('rm *.png')
 
 if __name__=="__main__":
+    os.system('rm *.png')
+    os.system('rm res.gif')
     #population parameters
-    pop_size = 100
-    x_min = -2
-    x_max = 2
-    y_min = -1
-    y_max = 3
+    pop_size = 300
+    scaling = 1.0
+    x_min = scaling*(-2)
+    x_max = scaling*(2)
+    y_min = scaling*(-1)
+    y_max = scaling*(3)
     #scale to x and y range of plot
     x_diff = x_max - x_min
     y_diff = y_max - y_min
@@ -211,7 +262,7 @@ if __name__=="__main__":
     a=1
     b=100
     #constants for iteration
-    tol=2e-1
-    iters=30
+    tol=1e-2
+    iters=100
     #run
     main(pop_size, x_min, x_max, y_min, y_max, tol, iters)
