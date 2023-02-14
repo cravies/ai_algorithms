@@ -2,12 +2,12 @@
 Implementations of common AI algorithms from scratch.
 Includes:
 
+- Darknet19 for object classification (fruits)
 - Decision tree
 - Genetic programming for symbolic regression
 - Genetic algorithm to optimise Rosenbrock function
 - Langton’s ant simulator
 - Multi Layer Perceptron
-- Darknet19 for object classification (fruits)
 - CNN for digit rotation detection
 - Perceptron for linear classification
 - Variational auto encoder (MMD & ELBO loss)
