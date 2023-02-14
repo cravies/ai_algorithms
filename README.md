@@ -1,20 +1,33 @@
 # ai_algorithms
-Implementations of common AI algorithms from scratch.
+My implementations of common AI algorithms from scratch.
 Includes:
 
-- Darknet19 for object classification (fruits)
-- Decision tree
-- Genetic programming for symbolic regression
-- Genetic algorithm to optimise Rosenbrock function
-- Langton’s ant simulator
-- Multi Layer Perceptron
-- CNN for digit rotation detection
-- Perceptron for linear classification
-- Variational auto encoder (MMD & ELBO loss)
-- K means clustering
-- K nearest neighbours
-- Naive bayes 
-- Naive bayes variable elimination method
+## Neural Networks
+* CNN for shape recognition
+* MLP 
+* Darknet19 for fruit classification
+* CNN for MNIST rotation detection
+* Perceptron
+* Variational Autoencoder (ELBO loss)
+* Variational Autoencoder (MMD loss)
+
+## Statistical Learning
+* K means clustering
+* K nearest neighbours
+* Naive bayes 
+* Naive babes variable elimination
+
+## Evolutionary Computation
+* Genetic programming - symbolic regression for denoising
+* Genetic programming for function fitting
+* Genetic algorithm to solve rosenbrock function
+* Genetic algorithm to solve the knapsack problem
+* Langton’s Ant simulation
+
+## Decision Tree
+* Decision tree algorithm for classification
+
+## Details
 
 I mostly used numpy. For the complicated neural network models I used pytorch.
 I wrote these programs for various classes I am taking in compsci graduate school.
