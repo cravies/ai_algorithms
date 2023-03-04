@@ -144,7 +144,7 @@ int main() {
 
     cout << "~~~~~~~ Training ~~~~~~~\n";
     // run gradient descent
-    gradient_descent(Y_train_1hot, X_train, A_1, A_2, z_1, z_2, W_1, b_1, W_2, b_2);
+    stochastic_gradient_descent(Y_train_1hot, X_train, A_1, A_2, z_1, z_2, W_1, b_1, W_2, b_2);
     // test accuracy on testing set
     forward_prop(X_test, A_1, A_2, z_1, z_2, W_1, b_1, W_2, b_2);
     cout << "~~~~~~~ Testing ~~~~~~~~~\n";
