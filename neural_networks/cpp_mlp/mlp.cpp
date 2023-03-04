@@ -1,4 +1,5 @@
 #include "read_csv.h"
+#include "utils.h"
 #include "Eigen/Dense"
 #include "Eigen/Core"
 #include <iostream>
@@ -9,8 +10,8 @@ using namespace std;
 
 // MLP run data
 const double ETA = 0.1;
-const int EPOCHS = 100;
-const int SAMPLES = 60000;
+const int EPOCHS = 300;
+const int SAMPLES = 1000;
 
 void print_stats(MatrixXd A, string name) {
     cout << name << " shape: " << A.rows() << "x" << A.cols() << "\n"; 
@@ -88,14 +89,23 @@ void check_acc(MatrixXd preds, MatrixXd Y) {
     cout << "Accuracy: " << correct/preds.cols() << "\n";
 }
 
-// pass W_1, b_1, W_2, b_2 by reference as we want to modify
-void gradient_descent(MatrixXd Y, MatrixXd A_0, MatrixXd A_1, 
+// use minibatch stochastic gradient descent
+// faster, gives better results.
+void stochastic_gradient_descent(MatrixXd Y, MatrixXd A_0, MatrixXd A_1, 
                       MatrixXd A_2, MatrixXd z_1, MatrixXd z_2, 
                       MatrixXd &W_1, VectorXd &b_1, MatrixXd &W_2, VectorXd &b_2) {
+    MatrixXd Y_sample;
+    MatrixXd A_0_sample;
     for (int i=0; i<EPOCHS; i++) {
-        forward_prop(A_0, A_1, A_2, z_1, z_2, W_1, b_1, W_2, b_2);
-        check_acc(A_2, Y);
-        back_prop(Y, A_0, A_1, A_2, z_1, W_1, b_1, W_2, b_2);
+        // randomly sample subset of A_0, Y
+        // due to stochastic gradient descent
+        // (upper_limit,size)
+        auto cols = rand_vector(60000,SAMPLES);
+        Y_sample = Y(all, cols);
+        A_0_sample = A_0(all, cols);
+        forward_prop(A_0_sample, A_1, A_2, z_1, z_2, W_1, b_1, W_2, b_2);
+        check_acc(A_2, Y_sample);
+        back_prop(Y_sample, A_0_sample, A_1, A_2, z_1, W_1, b_1, W_2, b_2);
     }
 }
 
@@ -115,8 +125,8 @@ int main() {
     MatrixXd X_train = load_csv<MatrixXd>("./x_train.csv");
     MatrixXd X_test = load_csv<MatrixXd>("./x_test.csv");
     // let's make one hot encodings for Y_train, Y_test
-    MatrixXd Y_train_1hot = MatrixXd::Zero(10,SAMPLES);
-    MatrixXd Y_test_1hot = MatrixXd::Zero(10,SAMPLES);
+    MatrixXd Y_train_1hot = MatrixXd::Zero(10,60000);
+    MatrixXd Y_test_1hot = MatrixXd::Zero(10,60000);
     one_hot_encode(Y_train, Y_train_1hot);
     one_hot_encode(Y_test, Y_test_1hot);
 
