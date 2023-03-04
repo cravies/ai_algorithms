@@ -4,10 +4,10 @@ Includes:
 
 ## Neural Networks
 * CNN for shape recognition
-* MLP 
+* MLP from scratch in numpy and C++
 * Darknet19 for fruit classification
 * CNN for MNIST rotation detection
-* Perceptron
+* Perceptron from scratch in numpy and C++
 * Variational Autoencoder (ELBO loss)
 * Variational Autoencoder (MMD loss)
 
